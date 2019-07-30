@@ -11,6 +11,7 @@
 ## create chain of trust certificate (concatinate intermediate cert | root cert)              ##
 ## $1 root CA openssl configuration file                                                      ##
 ## $2 intermediate CA openssl configuration file                                              ##
+## $3 digital signature algorithm                                                             ##
 ################################################################################################
 
 #Colors
@@ -18,10 +19,10 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-if [[ $# -ne 2 ]]
+if [[ $# -ne 3 ]]
 then
   echo -e "${RED}bad arguments${NC}"
-  echo "usage: create_CAs.sh <openssl root CA config file> <openssl intermediate CA config file>"
+  echo "usage: create_CAs.sh <openssl root CA config file> <openssl intermediate CA config file> <rsa|ecdsa>"
   exit 1
 fi
 
@@ -37,9 +38,15 @@ touch index.txt
 echo 1000 > serial
 
 #generate root key
-openssl genrsa -out private/ca.key.pem 4096 &> /dev/null
-echo -e "${GREEN}##### Root certificate authority RSA key pair generated #####${NC}"
-
+if [[ "$3" == "rsa" ]]
+then
+  openssl genrsa -out private/ca.key.pem 4096 &> /dev/null
+  echo -e "${GREEN}##### Root certificate authority RSA key pair generated #####${NC}"
+elif [[ "$3" == "ecdsa" ]]
+then
+  openssl ecparam -name prime256v1 -genkey -out private/ca.key.pem &> /dev/null
+  echo -e "${GREEN}##### Root certificate authority ECDSA key pair generated #####${NC}"
+fi
 
 #set permissions for the root key
 chmod 400 private/ca.key.pem
@@ -73,8 +80,15 @@ echo 1000 > serial
 echo 1000 > crlnumber
 
 #generate private key
-openssl genrsa -out private/intermediate.key.pem 4096 &> /dev/null
-echo -e "${GREEN}##### Intermediate certificate authority RSA key pair generated #####${NC}"
+if [[ "$3" == "rsa" ]]
+then
+  openssl genrsa -out private/intermediate.key.pem 4096 &> /dev/null
+  echo -e "${GREEN}##### Intermediate certificate authority RSA key pair generated #####${NC}"
+elif [[ "$3" == "ecdsa" ]]
+then
+  openssl ecparam -name prime256v1 -genkey -out private/intermediate.key.pem &> /dev/null
+  echo -e "${GREEN}##### Intermediate certificate authority ECDSA key pair generated #####${NC}"
+fi
 
 #set permissions
 chmod 400 private/intermediate.key.pem

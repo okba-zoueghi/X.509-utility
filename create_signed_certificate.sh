@@ -9,6 +9,7 @@
 ## $2 is openssl intermediate CA configuration file                                           ##
 ## $3 mention certificate type : the value should be "client" or "server"                     ##
 ## $4 Validity of the certificate in days                                                     ##
+## $5 digital signature algorithm                                                             ##
 ################################################################################################
 
 #Colors
@@ -16,17 +17,25 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-if [[ $# -ne 4 ]]
+if [[ $# -ne 5 ]]
 then
   echo -e "${RED}bad arguments${NC}"
-  echo "usage: create_signed_certificate.sh <certname> <openssl intermediate CA config file> <server | client> <validity in days>"
+  echo "usage: create_signed_certificate.sh <certname> <openssl intermediate CA config file> <server | client> <validity in days> <rsa|ecdsa>"
   echo " <server | client> : choose 'server' to generate a server certificate and 'client' to generate a client certficate'"
   exit 1
 fi
 
 #Generate RSA pair
-openssl genrsa -out intermediate/private/$1.key.pem 2048
-echo -e "${GREEN}##### RSA key pair generated #####${NC}"
+if [[ "$5" == "rsa" ]]
+then
+  openssl genrsa -out intermediate/private/$1.key.pem 2048
+  echo -e "${GREEN}##### RSA key pair generated #####${NC}"
+elif [[ "$5" == "ecdsa" ]]
+then
+  openssl ecparam -name prime256v1 -genkey -out intermediate/private/$1.key.pem &> /dev/null
+  echo -e "${GREEN}##### ECDSA key pair generated #####${NC}"
+fi
+
 
 #Create a certificate signing request
 echo -e "${GREEN}##### Creating certificate signing request #####${NC}"
