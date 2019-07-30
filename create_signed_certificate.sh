@@ -34,8 +34,10 @@ elif [[ "$5" == "ecdsa" ]]
 then
   openssl ecparam -name prime256v1 -genkey -out intermediate/private/$1.key.pem &> /dev/null
   echo -e "${GREEN}##### ECDSA key pair generated #####${NC}"
+else
+  echo -e "${RED}bad arguments${NC}"
+  exit 1
 fi
-
 
 #Create a certificate signing request
 echo -e "${GREEN}##### Creating certificate signing request #####${NC}"

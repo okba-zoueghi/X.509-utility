@@ -46,6 +46,9 @@ elif [[ "$3" == "ecdsa" ]]
 then
   openssl ecparam -name prime256v1 -genkey -out private/ca.key.pem &> /dev/null
   echo -e "${GREEN}##### Root certificate authority ECDSA key pair generated #####${NC}"
+else
+  echo -e "${RED}bad arguments${NC}"
+  exit 1
 fi
 
 #set permissions for the root key
@@ -88,6 +91,9 @@ elif [[ "$3" == "ecdsa" ]]
 then
   openssl ecparam -name prime256v1 -genkey -out private/intermediate.key.pem &> /dev/null
   echo -e "${GREEN}##### Intermediate certificate authority ECDSA key pair generated #####${NC}"
+else
+  echo -e "${RED}bad arguments${NC}"
+  exit 1
 fi
 
 #set permissions
