@@ -6,15 +6,15 @@ The utility uses openssl command line and allows to create client or server cert
 
 The utility consists of two bash scripts and two configuration files:
 
-**openssl.root.cnf** : 
+**openssl.root.cnf** :
 
 Root CA openssl configuration file
 
-**openssl.intermediate.cnf** : 
+**openssl.intermediate.cnf** :
 
 Intermediate CA openssl configuration file
 
-**create_CAs.sh** : 
+**create_CAs.sh** :
 
 1- Generates root CA key pair     
 
@@ -36,19 +36,28 @@ Intermediate CA openssl configuration file
 
 3- Signs the certificates request with the intermediate Certificate Authority's private key
 
-## Usage: 
+## Usage:
 
 ```shell
-create_CAs.sh <openssl root CA config file> <openssl intermediate CA config file>
-create_signed_certificate.sh <certname> <openssl intermediate CA config file> <server | client> <validity in days>
+create_CAs.sh <openssl root CA config file> <openssl intermediate CA config file> <rsa|ecdsa>
+create_signed_certificate.sh <certname> <openssl intermediate CA config file> <server | client> <validity in days> <rsa|ecdsa>
 ```
 
-## Example
+## Example using RSA
 
 ```shell
-create_CAs.sh openssl.root.cnf openssl.intermediate.cnf 
-create_signed_certificate.sh server openssl.intermediate.cnf server 500
+create_CAs.sh openssl.root.cnf openssl.intermediate.cnf rsa
+create_signed_certificate.sh server openssl.intermediate.cnf server 500 rsa
 ```
+
+## Example using ECDSA
+
+```shell
+create_CAs.sh openssl.root.cnf openssl.intermediate.cnf ecdsa
+create_signed_certificate.sh server openssl.intermediate.cnf server 500 ecdsa
+```
+
+## Output
 
 After running **create_CAs.sh**, the following files will be created:
 
