@@ -55,6 +55,12 @@ create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermedi
 If the curve is not specified then the default one is used.
 The default curve is **prime256v1**.
 
+To see of the list of supported curves, the following openssl command could be used:
+
+```shell
+openssl ecparam -list_curves
+```
+
 ## Output
 
 After running **create_CAs.sh**, the following files will be created:
