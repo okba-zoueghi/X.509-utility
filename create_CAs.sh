@@ -1,6 +1,5 @@
 #! /bin/bash
 
-
 ################################################################################################
 ## This script                                                                                ##
 ## generates root CA key pair                                                                 ##
@@ -9,22 +8,58 @@
 ## create intermediate CA certificate request                                                 ##
 ## create intermediate CA certificate (signed by the root CA's private key)                   ##
 ## create chain of trust certificate (concatinate intermediate cert | root cert)              ##
-## $1 root CA openssl configuration file                                                      ##
-## $2 intermediate CA openssl configuration file                                              ##
-## $3 digital signature algorithm                                                             ##
 ################################################################################################
+
+if [[ ($# -lt 8) || ($# -gt 10) ]]
+then
+  echo "usage: create_CAs.sh --root-cnf-file <openssl root CA config file> \
+  --int-cnf-file <openssl intermediate CA config file> \
+  --sig-alg <rsa|ecdsa>\
+  --validity <validity in days>\
+  "
+
+  echo "if ecdsa is used, specify the curve with the option --curve <openssl curve name>"
+  exit 1
+fi
 
 #Colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-if [[ $# -ne 3 ]]
-then
-  echo -e "${RED}bad arguments${NC}"
-  echo "usage: create_CAs.sh <openssl root CA config file> <openssl intermediate CA config file> <rsa|ecdsa>"
-  exit 1
-fi
+#Default ECDSA curve
+ECDSA_CURVE=prime256v1
+
+TEMP=$(getopt -o r:i:s:c:v: --long root-cnf-file:,int-cnf-file:,sig-alg:,curve:,validity: -- "$@")
+eval set -- "$TEMP"
+
+while true; do
+  case "$1" in
+    -r|--root-cnf-file)
+      ROOT_CA_CNF_FILE=$2 ; shift 2
+    ;;
+    -i|--int-cnf-file)
+      INTERMEDIATE_CA_CNF_FILE=$2 ; shift 2
+    ;;
+    -s|--sig-alg)
+      case "$2" in
+        rsa) SIGNATURE_ALGORITHM="rsa"; shift 2 ;;
+        ecdsa) SIGNATURE_ALGORITHM="ecdsa"; shift 2 ;;
+        *) echo "Signature algorithm $2 unrecognized"; exit 1;;
+      esac
+    ;;
+    -c|--curve)
+      ECDSA_CURVE=$2 ; shift 2
+    ;;
+    -v|--validity)
+      VALIDITY_IN_DAYS=$2 ; shift 2
+    ;;
+    --) shift; break
+    ;;
+    *) echo "Invalid option $1" >&2; exit 1
+    ;;
+  esac
+done
 
 ############################# Root Certificate Authority ######################
 #prepare directories
@@ -38,17 +73,14 @@ touch index.txt
 echo 1000 > serial
 
 #generate root key
-if [[ "$3" == "rsa" ]]
+if [[ "$SIGNATURE_ALGORITHM" == "rsa" ]]
 then
   openssl genrsa -out private/ca.key.pem 4096 &> /dev/null
   echo -e "${GREEN}##### Root certificate authority RSA key pair generated #####${NC}"
-elif [[ "$3" == "ecdsa" ]]
+elif [[ "$SIGNATURE_ALGORITHM" == "ecdsa" ]]
 then
-  openssl ecparam -name prime256v1 -genkey -out private/ca.key.pem &> /dev/null
+  openssl ecparam -name $ECDSA_CURVE -genkey -out private/ca.key.pem &> /dev/null
   echo -e "${GREEN}##### Root certificate authority ECDSA key pair generated #####${NC}"
-else
-  echo -e "${RED}bad arguments${NC}"
-  exit 1
 fi
 
 #set permissions for the root key
@@ -57,9 +89,9 @@ chmod 400 private/ca.key.pem
 
 #create the self signed root certificate
 echo -e "${GREEN}##### Creating self signed Root certificate #####${NC}"
-openssl req -config $1 \
+openssl req -config $ROOT_CA_CNF_FILE \
       -key private/ca.key.pem \
-      -new -x509 -days 7300 -sha256 -extensions v3_ca \
+      -new -x509 -days $VALIDITY_IN_DAYS -sha256 -extensions v3_ca \
       -out certs/ca.cert.pem
 
 #set permissions for the root certificates
@@ -83,17 +115,14 @@ echo 1000 > serial
 echo 1000 > crlnumber
 
 #generate private key
-if [[ "$3" == "rsa" ]]
+if [[ "$SIGNATURE_ALGORITHM" == "rsa" ]]
 then
   openssl genrsa -out private/intermediate.key.pem 4096 &> /dev/null
   echo -e "${GREEN}##### Intermediate certificate authority RSA key pair generated #####${NC}"
-elif [[ "$3" == "ecdsa" ]]
+elif [[ "$SIGNATURE_ALGORITHM" == "ecdsa" ]]
 then
-  openssl ecparam -name prime256v1 -genkey -out private/intermediate.key.pem &> /dev/null
+  openssl ecparam -name $ECDSA_CURVE -genkey -out private/intermediate.key.pem &> /dev/null
   echo -e "${GREEN}##### Intermediate certificate authority ECDSA key pair generated #####${NC}"
-else
-  echo -e "${RED}bad arguments${NC}"
-  exit 1
 fi
 
 #set permissions
@@ -101,7 +130,7 @@ chmod 400 private/intermediate.key.pem
 ls
 #create certificate signing request
 echo -e "${GREEN}##### Creating certificate signing request #####${NC}"
-openssl req -config ../$2 -new -sha256 \
+openssl req -config ../$INTERMEDIATE_CA_CNF_FILE -new -sha256 \
       -key private/intermediate.key.pem \
       -out csr/intermediate.csr.pem
 
@@ -109,8 +138,8 @@ openssl req -config ../$2 -new -sha256 \
 cd ..
 ls
 echo -e "${GREEN}##### Signing the intermediate CA's certificate with the root private key #####${NC}"
-openssl ca -config $1 -extensions v3_intermediate_ca \
-      -days 3650 -notext -md sha256 \
+openssl ca -config $ROOT_CA_CNF_FILE -extensions v3_intermediate_ca \
+      -days $VALIDITY_IN_DAYS -notext -md sha256 \
       -in intermediate/csr/intermediate.csr.pem \
       -out intermediate/certs/intermediate.cert.pem
 

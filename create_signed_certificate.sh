@@ -5,60 +5,93 @@
 ## generates a private key                                                                    ##
 ## creates a certificate request                                                              ##
 ## signs the certificates request with the intermediate Certificate Authority's private key   ##
-## $1 is the certificate name                                                                 ##
-## $2 is openssl intermediate CA configuration file                                           ##
-## $3 mention certificate type : the value should be "client" or "server"                     ##
-## $4 Validity of the certificate in days                                                     ##
-## $5 digital signature algorithm                                                             ##
 ################################################################################################
+
+if [[ ($# -lt 10) || ($# -gt 12) ]]
+then
+  echo "usage: create_signed_certificate.sh --cert-name <certname> \
+  --int-cnf-file <openssl intermediate CA config file> \
+  --role <server | client> \
+  --validity <validity in days>
+  --sig-alg <rsa|ecdsa>"
+
+  echo "if ecdsa is used, specify the curve with the option --curve <openssl curve name>"
+  exit 1
+fi
 
 #Colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-if [[ $# -ne 5 ]]
-then
-  echo -e "${RED}bad arguments${NC}"
-  echo "usage: create_signed_certificate.sh <certname> <openssl intermediate CA config file> <server | client> <validity in days> <rsa|ecdsa>"
-  echo " <server | client> : choose 'server' to generate a server certificate and 'client' to generate a client certficate'"
-  exit 1
-fi
+#Default ECDSA curve
+ECDSA_CURVE=prime256v1
+
+TEMP=$(getopt -o n:i:r:s:c:v: --long cert-name:,int-cnf-file:,role:,sig-alg:,curve:,validity: -- "$@")
+eval set -- "$TEMP"
+
+while true; do
+  case "$1" in
+    -n|--cert-name)
+      CERT_NAME=$2 ; shift 2
+    ;;
+    -i|--int-cnf-file)
+      INTERMEDIATE_CA_CNF_FILE=$2 ; shift 2
+    ;;
+    -r|--role)
+      case "$2" in
+        server|client) ROLE=$2 ; shift 2;;
+        *) echo "Role $2 unrecognized"; exit 1;;
+      esac
+    ;;
+    -s|--sig-alg)
+      case "$2" in
+        rsa) SIGNATURE_ALGORITHM="rsa"; shift 2 ;;
+        ecdsa) SIGNATURE_ALGORITHM="ecdsa"; shift 2 ;;
+        *) echo "Signature algorithm $2 unrecognized"; exit 1;;
+      esac
+    ;;
+    -c|--curve)
+      ECDSA_CURVE=$2 ; shift 2
+    ;;
+    -v|--validity)
+      VALIDITY_IN_DAYS=$2 ; shift 2
+    ;;
+    --) shift; break
+    ;;
+    *) echo "Invalid option $1" >&2; exit 1
+    ;;
+  esac
+done
 
 #Generate RSA pair
-if [[ "$5" == "rsa" ]]
+if [[ "$SIGNATURE_ALGORITHM" == "rsa" ]]
 then
-  openssl genrsa -out intermediate/private/$1.key.pem 2048
+  openssl genrsa -out intermediate/private/$CERT_NAME.key.pem 2048
   echo -e "${GREEN}##### RSA key pair generated #####${NC}"
-elif [[ "$5" == "ecdsa" ]]
+elif [[ "$SIGNATURE_ALGORITHM" == "ecdsa" ]]
 then
-  openssl ecparam -name prime256v1 -genkey -out intermediate/private/$1.key.pem &> /dev/null
+  openssl ecparam -name $ECDSA_CURVE -genkey -out intermediate/private/$CERT_NAME.key.pem &> /dev/null
   echo -e "${GREEN}##### ECDSA key pair generated #####${NC}"
-else
-  echo -e "${RED}bad arguments${NC}"
-  exit 1
 fi
 
 #Create a certificate signing request
 echo -e "${GREEN}##### Creating certificate signing request #####${NC}"
-openssl req -config $2 -key intermediate/private/$1.key.pem -new -sha256 -out intermediate/csr/$1.csr.pem
+openssl req -config $INTERMEDIATE_CA_CNF_FILE -key intermediate/private/$CERT_NAME.key.pem -new -sha256 -out intermediate/csr/$CERT_NAME.csr.pem
 
 #Create the signed certificate
-if [ "$3" == "server" ]
+if [ "$ROLE" == "server" ]
 then
-  openssl ca -config $2 \
-        -extensions server_cert -days $4 -notext -md sha256 \
-        -in intermediate/csr/$1.csr.pem \
-        -out intermediate/certs/$1.cert.pem
-elif [ "$3" == "client" ]
+  openssl ca -config $INTERMEDIATE_CA_CNF_FILE \
+        -extensions server_cert -days $VALIDITY_IN_DAYS -notext -md sha256 \
+        -in intermediate/csr/$CERT_NAME.csr.pem \
+        -out intermediate/certs/$CERT_NAME.cert.pem
+elif [ "$ROLE" == "client" ]
 then
-  openssl ca -config $2 \
-        -extensions usr_cert -days $4 -notext -md sha256 \
-        -in intermediate/csr/$1.csr.pem \
-        -out intermediate/certs/$1.cert.pem
-else
-  echo -e "${RED}bad arguments${NC}"
-  exit 1
+  openssl ca -config $INTERMEDIATE_CA_CNF_FILE \
+        -extensions usr_cert -days $VALIDITY_IN_DAYS -notext -md sha256 \
+        -in intermediate/csr/$CERT_NAME.csr.pem \
+        -out intermediate/certs/$CERT_NAME.cert.pem
 fi
 
-echo -e "${GREEN}##### Signed the $3 certificate with the intermediate CA private key #####${NC}"
+echo -e "${GREEN}##### Signed the $ROLE certificate with the intermediate CA private key #####${NC}"
