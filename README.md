@@ -1,6 +1,7 @@
 # X.509-utility
 
 The utility uses openssl command line and allows to create client or server certificate.
+The utility supports RSA and ECDSA.
 
 ## Description
 
@@ -36,26 +37,23 @@ Intermediate CA openssl configuration file
 
 3- Signs the certificates request with the intermediate Certificate Authority's private key
 
-## Usage:
-
-```shell
-create_CAs.sh <openssl root CA config file> <openssl intermediate CA config file> <rsa|ecdsa>
-create_signed_certificate.sh <certname> <openssl intermediate CA config file> <server | client> <validity in days> <rsa|ecdsa>
-```
 
 ## Example using RSA
 
 ```shell
-create_CAs.sh openssl.root.cnf openssl.intermediate.cnf rsa
-create_signed_certificate.sh server openssl.intermediate.cnf server 500 rsa
+create_CAs.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg rsa --validity 3700
+create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermediate.cnf --role server --sig-alg rsa --validity 360
 ```
 
 ## Example using ECDSA
 
 ```shell
-create_CAs.sh openssl.root.cnf openssl.intermediate.cnf ecdsa
-create_signed_certificate.sh server openssl.intermediate.cnf server 500 ecdsa
+create_CAs.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg ecdsa --curve prime256v1 --validity 3700
+create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermediate.cnf --role server --sig-alg ecdsa --curve prime256v1 --validity 360
 ```
+
+If the curve is not specified then the default one is used.
+The default curve is **prime256v1**.
 
 ## Output
 
