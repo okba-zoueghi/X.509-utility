@@ -1,7 +1,7 @@
 # X.509-utility
 
 The utility uses openssl command line and allows to create client or server certificate.
-The utility supports RSA and ECDSA.
+The utility supports RSA, ECDSA, and ED25519.
 
 ## Description
 
@@ -59,6 +59,12 @@ To see of the list of supported curves, the following openssl command could be u
 
 ```shell
 openssl ecparam -list_curves
+```
+## Example using ED25519
+
+```shell
+create_CAs.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg ed25519 --validity 3700
+create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermediate.cnf --role server --sig-alg ed25519 --validity 360
 ```
 
 ## Output
