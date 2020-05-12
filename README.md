@@ -21,7 +21,7 @@ Intermediate CA openssl configuration file
 
 2- Creates self signed root certificate
 
-3- Generate intermediate CA key pair  
+3- Generates intermediate CA key pair  
 
 4- Creates intermediate CA certificate request
 
@@ -71,9 +71,9 @@ create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermedi
 
 After running **create_certificate_authorities.sh**, the following files will be created:
 
-**private/ca.key.pem** : root CA RSA key pair
+**private/ca.key.pem** : root CA key pair
 
-**intermediate/private/intermediate.key.pem** : intermediate CA RSA key pair
+**intermediate/private/intermediate.key.pem** : intermediate CA key pair
 
 **certs/ca.cert.pem** : self signed root CA certificate
 
@@ -83,6 +83,6 @@ After running **create_certificate_authorities.sh**, the following files will be
 
 After running **create_signed_certificate.sh**, the following files will be created:
 
-**intermediate/private/server.key.pem** : server RSA key pair
+**intermediate/private/server.key.pem** : server key pair
 
 **intermediate/certs/server.cet.pem** : server certificate (signed by the intermediate CA)
