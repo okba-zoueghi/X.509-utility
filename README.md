@@ -15,7 +15,7 @@ Root CA openssl configuration file
 
 Intermediate CA openssl configuration file
 
-**create_CAs.sh** :
+**create_certificate_authorities.sh** :
 
 1- Generates root CA key pair     
 
@@ -41,14 +41,14 @@ Intermediate CA openssl configuration file
 ## Example using RSA
 
 ```shell
-create_CAs.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg rsa --validity 3700
+create_certificate_authorities.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg rsa --validity 3700
 create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermediate.cnf --role server --sig-alg rsa --validity 360
 ```
 
 ## Example using ECDSA
 
 ```shell
-create_CAs.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg ecdsa --curve prime256v1 --validity 3700
+create_certificate_authorities.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg ecdsa --curve prime256v1 --validity 3700
 create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermediate.cnf --role server --sig-alg ecdsa --curve prime256v1 --validity 360
 ```
 
@@ -63,13 +63,13 @@ openssl ecparam -list_curves
 ## Example using ED25519
 
 ```shell
-create_CAs.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg ed25519 --validity 3700
+create_certificate_authorities.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg ed25519 --validity 3700
 create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermediate.cnf --role server --sig-alg ed25519 --validity 360
 ```
 
 ## Output
 
-After running **create_CAs.sh**, the following files will be created:
+After running **create_certificate_authorities.sh**, the following files will be created:
 
 **private/ca.key.pem** : root CA RSA key pair
 
