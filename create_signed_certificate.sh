@@ -13,7 +13,7 @@ then
   --int-cnf-file <openssl intermediate CA config file> \
   --role <server | client> \
   --validity <validity in days>
-  --sig-alg <rsa|ecdsa>"
+  --sig-alg <rsa|ecdsa|ed25519>"
 
   echo "if ecdsa is used, specify the curve with the option --curve <openssl curve name>"
   exit 1
@@ -48,6 +48,7 @@ while true; do
       case "$2" in
         rsa) SIGNATURE_ALGORITHM="rsa"; shift 2 ;;
         ecdsa) SIGNATURE_ALGORITHM="ecdsa"; shift 2 ;;
+        ed25519) SIGNATURE_ALGORITHM="ed25519"; shift 2;;
         *) echo "Signature algorithm $2 unrecognized"; exit 1;;
       esac
     ;;
@@ -73,6 +74,10 @@ elif [[ "$SIGNATURE_ALGORITHM" == "ecdsa" ]]
 then
   openssl ecparam -name $ECDSA_CURVE -genkey -out intermediate/private/$CERT_NAME.key.pem &> /dev/null
   echo -e "${GREEN}##### ECDSA key pair generated #####${NC}"
+elif [[ "$SIGNATURE_ALGORITHM" == "ed25519" ]]
+then
+  openssl genpkey -algorithm ED25519 -out intermediate/private/$CERT_NAME.key.pem &> /dev/null
+  echo -e "${GREEN}##### ED25519 key pair generated #####${NC}"
 fi
 
 #Create a certificate signing request
