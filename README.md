@@ -27,8 +27,6 @@ Intermediate CA openssl configuration file
 
 5- Creates intermediate CA certificate (signed by the root CA's private key)
 
-6- Creates chain of trust certificate (concatinate intermediate cert | root cert)              
-
 **create_signed_certificate.sh** :
 
 1- Generates a key pair
@@ -37,6 +35,7 @@ Intermediate CA openssl configuration file
 
 3- Signs the certificates request with the intermediate Certificate Authority's private key
 
+4- Creates chain of trust certificate (concatenate endPoint cert | root cert) 
 
 ## Example using RSA
 

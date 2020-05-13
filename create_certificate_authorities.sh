@@ -154,12 +154,4 @@ openssl ca -config $ROOT_CA_CNF_FILE -extensions v3_intermediate_ca \
 
 #set permissions
 chmod 444 intermediate/certs/intermediate.cert.pem
-
-#create the certificate chain file (chain.cert => intermediate.cert | root.cert)
-cat intermediate/certs/intermediate.cert.pem \
-      certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
-echo -e "${GREEN}##### Created the certificate chain file #####${NC}"
-
-#set permissions
-chmod 444 intermediate/certs/ca-chain.cert.pem
 #############################  Intermediate Certificate Authority ######################
