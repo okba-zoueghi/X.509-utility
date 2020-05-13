@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/okba-zoueghi/X.509-utility"><img src="https://image.flaticon.com/icons/svg/483/483408.svg" alt="Markdownify" width="200"></a>
+  <a href="https://github.com/okba-zoueghi/X.509-utility"><img src="https://raw.githubusercontent.com/okba-zoueghi/X.509-utility/master/x509-utility-logo.png" alt="Markdownify" width="200"></a>
   <br>
   X.509-utility
   <br>
