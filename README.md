@@ -35,7 +35,7 @@ Intermediate CA openssl configuration file
 
 3- Signs the certificates request with the intermediate Certificate Authority's private key
 
-4- Creates chain of trust certificate (concatenate endPoint cert | root cert) 
+4- Creates chain of trust certificate (concatenate endPoint cert | root cert)
 
 ## Example using RSA
 
@@ -78,10 +78,10 @@ After running **create_certificate_authorities.sh**, the following files will be
 
 **intermediate/certs/intermediate.cert.pem** : intermediate CA certificate (signed by the root CA)
 
-**intermediate/certs/ca-chain.cert.pem** : Chain certificate (intermediate cert | root cert)
-
 After running **create_signed_certificate.sh**, the following files will be created:
 
 **intermediate/private/server.key.pem** : server key pair
 
-**intermediate/certs/server.cet.pem** : server certificate (signed by the intermediate CA)
+**intermediate/certs/server.cert.pem** : server certificate (signed by the intermediate CA)
+
+**intermediate/certs/server.chain.cert.pem** : Chain certificate (server cert | root cert)
