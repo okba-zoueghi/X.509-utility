@@ -37,8 +37,6 @@ Intermediate CA openssl configuration file
 4- Creates intermediate CA certificate request
 
 5- Creates intermediate CA certificate (signed by the root CA's private key)
-
-6- Creates chain of trust certificate (concatinate intermediate cert | root cert)   
 ```           
 
 **create_signed_certificate.sh** : :key:
@@ -51,8 +49,10 @@ Intermediate CA openssl configuration file
 
 3- Signs the certificates request with the intermediate Certificate Authority's private key
 
+4- Creates chain of trust certificate (concatenate endPoint cert | intermediate cert)
 ```  
 ## Example using RSA :mag:
+
 
 ```shell
 create_certificate_authorities.sh --root-cnf-file openssl.root.cnf --int-cnf-file openssl.intermediate.cnf --sig-alg rsa --validity 3700
@@ -81,9 +81,6 @@ create_certificate_authorities.sh --root-cnf-file openssl.root.cnf --int-cnf-fil
 create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermediate.cnf --role server --sig-alg ed25519 --validity 360
 ```
 
-
-
-
 ## Output :boom:
 
 ### After running **create_certificate_authorities.sh**, the following files will be created:
@@ -96,23 +93,15 @@ create_signed_certificate.sh --cert-name server --int-cnf-file openssl.intermedi
 
 **intermediate/certs/intermediate.cert.pem** : intermediate CA certificate (signed by the root CA)
 
-**intermediate/certs/ca-chain.cert.pem** : Chain certificate (intermediate cert | root cert)
-
-After running **create_signed_certificate.sh**, the following files will be created:
+### After running **create_signed_certificate.sh**, the following files will be created:
 
 **intermediate/private/server.key.pem** : server key pair
 
-**intermediate/certs/server.cet.pem** : server certificate (signed by the intermediate CA)
+**intermediate/certs/server.cert.pem** : server certificate (signed by the intermediate CA)
 
-
-## Support :clap: :clap: :clap:
-
-<a href="https://www.buymeacoffee.com/5Zn8Xh3l9" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/purple_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
-
+**intermediate/certs/server.chain.cert.pem** : Chain certificate (server cert | intermediate cert)
 
 ## License
 
 MIT
-
----
 

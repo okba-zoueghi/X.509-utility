@@ -100,3 +100,9 @@ then
 fi
 
 echo -e "${GREEN}##### Signed the $ROLE certificate with the intermediate CA private key #####${NC}"
+
+
+#Create certificate chain (chain.cert => endPoint.cert || intermediate.cert)
+cat intermediate/certs/$CERT_NAME.cert.pem \
+intermediate/certs/intermediate.cert.pem > intermediate/certs/$CERT_NAME.chain.cert.pem
+echo -e "${GREEN}##### Created the certificate chain file #####${NC}"
